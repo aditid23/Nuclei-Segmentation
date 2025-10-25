@@ -198,9 +198,18 @@ if uploaded_files:
                 sidebar_open = st.sidebar._is_running_with_streamlit
                 col_gap = "medium" if sidebar_open else "small"
                 col1, col2, col3 = st.columns([1,1,1], gap=col_gap)
-                with col1: st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), use_container_width=True, caption="Original")
-                with col2: st.image(mask, use_container_width=True, caption="Predicted Mask")
-                with col3: st.image(overlay, use_container_width=True, caption="Overlay")
+                with col1:
+                    st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), use_container_width=True)
+                    st.markdown("<p style='text-align:center; font-size:20px; font-weight:bold;'>Original</p>", unsafe_allow_html=True)
+
+                with col2:
+                    st.image(mask, use_container_width=True)
+                    st.markdown("<p style='text-align:center; font-size:20px; font-weight:bold;'>Predicted Mask</p>", unsafe_allow_html=True)
+
+                with col3:
+                    st.image(overlay, use_container_width=True)
+                    st.markdown("<p style='text-align:center; font-size:20px; font-weight:bold;'>Overlay</p>", unsafe_allow_html=True)
+
 
         zipf.close()
         masks_zip_io.seek(0)
