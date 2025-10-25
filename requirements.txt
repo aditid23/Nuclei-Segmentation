@@ -4,3 +4,4 @@ numpy
 matplotlib
 gdown
 h5py
+opencv-python-headless
