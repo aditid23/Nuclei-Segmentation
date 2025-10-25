@@ -155,7 +155,11 @@ st.sidebar.info(f"💻 Running on: **{device}**")
 # ===============================================================
 # 4) Upload & batch segmentation
 # ===============================================================
-uploaded_files = st.file_uploader("📁 Upload microscopy images (PNG/JPG)", type=["png","jpg","jpeg"], accept_multiple_files=True)
+uploaded_files = st.file_uploader(
+    "📁 Upload microscopy images (PNG/JPG)", 
+    type=["png","jpg","jpeg"], 
+    accept_multiple_files=True
+)
 
 if uploaded_files:
     st.markdown(f"### 📂 {len(uploaded_files)} file(s) uploaded")
@@ -175,24 +179,38 @@ if uploaded_files:
             mask = predict_mask(model, img, target_size=(224,224))
             cmap = getattr(cv2, f"COLORMAP_{colormap}")
             mask_color = cv2.applyColorMap(mask.astype(np.uint8), cmap)
-            overlay = cv2.addWeighted(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), alpha, mask_color, 1-alpha, 0)
+            overlay = cv2.addWeighted(
+                cv2.cvtColor(img, cv2.COLOR_BGR2RGB), 
+                alpha, 
+                mask_color, 
+                1-alpha, 
+                0
+            )
 
+            # Save masks and overlay to ZIP
             zipf.writestr(f"{uploaded_file.name.split('.')[0]}_mask.png", mask_to_bytes(mask))
             overlay_bgr = cv2.cvtColor(overlay, cv2.COLOR_RGB2BGR)
             _, overlay_buf = cv2.imencode(".png", overlay_bgr)
             zipf.writestr(f"{uploaded_file.name.split('.')[0]}_overlay.png", overlay_buf.tobytes())
 
+            # Display images in dynamic columns
             with st.expander(f"🔍 {uploaded_file.name}", expanded=False):
-                col1, col2, col3 = st.columns(3)
-                with col1: st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), width=350, caption="Original")
-                with col2: st.image(mask, width=350, caption="Predicted Mask")
-                with col3: st.image(overlay, width=350, caption="Overlay")
+                col_width = 300 if st.sidebar._is_running_with_streamlit else 350
+                col1, col2, col3 = st.columns(3, gap="medium")
+                with col1: st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), width=col_width, caption="Original")
+                with col2: st.image(mask, width=col_width, caption="Predicted Mask")
+                with col3: st.image(overlay, width=col_width, caption="Overlay")
 
         zipf.close()
         masks_zip_io.seek(0)
         elapsed = time.time() - start_time
         st.success(f"Batch segmentation finished in {elapsed:.1f}s")
-        st.download_button("💾 Download All Results (ZIP)", data=masks_zip_io, file_name="segmentation_results.zip", mime="application/zip")
+        st.download_button(
+            "💾 Download All Results (ZIP)", 
+            data=masks_zip_io, 
+            file_name="segmentation_results.zip", 
+            mime="application/zip"
+        )
 
 # Footer
 st.markdown("<hr>", unsafe_allow_html=True)
