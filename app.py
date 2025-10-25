@@ -193,13 +193,14 @@ if uploaded_files:
             _, overlay_buf = cv2.imencode(".png", overlay_bgr)
             zipf.writestr(f"{uploaded_file.name.split('.')[0]}_overlay.png", overlay_buf.tobytes())
 
-            # Display images in dynamic columns
+            # Display images in proportional columns with dynamic gap
             with st.expander(f"🔍 {uploaded_file.name}", expanded=False):
-                col_width = 300 if st.sidebar._is_running_with_streamlit else 350
-                col1, col2, col3 = st.columns(3, gap="medium")
-                with col1: st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), width=col_width, caption="Original")
-                with col2: st.image(mask, width=col_width, caption="Predicted Mask")
-                with col3: st.image(overlay, width=col_width, caption="Overlay")
+                sidebar_open = st.sidebar._is_running_with_streamlit
+                col_gap = "medium" if sidebar_open else "small"
+                col1, col2, col3 = st.columns([1,1,1], gap=col_gap)
+                with col1: st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), use_container_width=True, caption="Original")
+                with col2: st.image(mask, use_container_width=True, caption="Predicted Mask")
+                with col3: st.image(overlay, use_container_width=True, caption="Overlay")
 
         zipf.close()
         masks_zip_io.seek(0)
